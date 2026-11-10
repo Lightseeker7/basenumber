@@ -2,6 +2,8 @@
 Python library used for storing and performing arithmetic with integers of arbitrary base systems 2 and above.
 
 Github: [link](https://github.com/Lightseeker7/basenumber)
+
+Project: [linl](https://pypi.org/project/basenumber/)
 # BaseNumber Objects
 BaseNumber objects contain a tuple of integers for digits, an integer base, and a boolean for its negative state.
 
