@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: basenumber
-Version: 0.0.5
+Version: 0.0.6
 Summary: Package used for storing and performing arithmetic with integers of arbitrary base systems 2 and above.
 Author-email: "light.seeker" <light.the.seeker@gmail.com>
 License-Expression: MIT

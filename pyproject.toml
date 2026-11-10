@@ -3,7 +3,7 @@ requires = ["setuptools >= 77.0.3"]
 build-backend = "setuptools.build_meta"
 [project]
 name = "basenumber"
-version = "0.0.5"
+version = "0.0.6"
 authors = [
   { name="light.seeker", email="light.the.seeker@gmail.com" },
 ]
