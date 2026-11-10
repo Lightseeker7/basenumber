@@ -165,8 +165,8 @@ class BaseNumber:
             raise ValueError("BaseNumber object can only be subtracted with BaseNumber, int, or tuple")
 
     def __mul__(self, other):
-        if isinstance(other, BaseNumber.deep_convert(self.base)):
-            return BaseNumber.multiply(self,other)
+        if isinstance(other, BaseNumber):
+            return BaseNumber.multiply(self,other.deep_convert(self.base))
         elif isinstance(other,(int,tuple)):
             return BaseNumber.multiply(self,BaseNumber(other,self.base))
         else:
