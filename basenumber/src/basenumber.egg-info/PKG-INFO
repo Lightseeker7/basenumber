@@ -1,0 +1,370 @@
+Metadata-Version: 2.4
+Name: basenumber
+Version: 0.1.0
+Summary: Package used for storing and performing arithmetic with integers and rationals of arbitrary base systems 2 and above.
+Author-email: "light.seeker" <light.the.seeker@gmail.com>
+License-Expression: MIT
+Project-URL: Homepage, https://pypi.org/project/basenumber/
+Project-URL: Repository, https://github.com/Lightseeker7/basenumber
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE.txt
+Requires-Dist: baseconvert
+Dynamic: license-file
+
+# basenumber
+Python library used for storing and performing arithmetic with integers of arbitrary base systems 2 and above.
+
+Github: [link](https://github.com/Lightseeker7/basenumber)
+
+Project: [link](https://pypi.org/project/basenumber/)
+
+# Objects
+There are two types of objects this library provides. 
+
+BaseNumber objects 
+
+BaseRational objects
+
+```BaseNumber``` objects are integers of any arbitrary base 2 and above. Their base can be any positive integer 2 and above.
+
+```BaseRational``` objects are objects that contain two BaseNumber objects, one as a numerator and the other as a denominator. Their base can similarly be any positive integer 2 and above. 
+
+# BaseNumber Objects
+BaseNumber objects contain a tuple of integers for digits, an integer base, and a boolean for its negative state.
+
+## Creation
+To create a BaseNumber object using a tuple, it will set the object's value to the input tuple.
+
+To create a BaseNumber object using an integer, it will first convert the integer into the appropriate tuple.
+
+*The following two generate identical BaseNumber objects:*
+```
+BaseNumber(19,5)
+```
+```
+BaseNumber((3,4),5)
+```
+
+The negative value is automatically set to false. To create a negative BaseNumber object, include it in the arguments.
+```
+BaseNumber((3,4),5,True)
+```
+```
+BaseNumber((3,4),5,negative=True)
+```
+
+The instance variables holding these values are `value`, `base`, and `negative`.
+
+## Operations
+BaseNumber objects work with the following operations:
+```
++ - * ** / // %  divmod()
+```
+These work with other BaseNumber objects, BaseRational objects, integers, and tuples of integers, and most will return BaseNumber objects as outputs.
+
+If the other object is a BaseRational object, it will always return as a BaseRational object.
+
+`/` can take any of the above objects and will always return a simplified BaseRational object.
+
+`**` cannot take a BaseRational object as the exponent, but if the exponent is negative it will return a BaseRational object.
+
+`**` `//` `%` `divmod()` cannot take BaseRational objects.
+
+>Important
+>>If you are trying to multiply extremely large numbers together, it is smart to use the `BaseNumber.karatsuba()` function, which `*` will call if it is above a certain threshold anyways. 
+
+Comparison operators also work with the same available objects:
+```
+< > == <= >= 
+```
+
+They also work with the following functions:
+```
+int() float() abs() len() str()
+```
+`int()` will return the base 10 integer value of the number, `float()` the float of that number. `abs()` will set the `negative` value to `False`. `len()` will give the number of digits in the number.
+
+`str` is represented with the value, base, and negative state:
+```
+(3, 12, 5) b13 negative:True
+```
+In the case of the value being too long or otherwise throwing an error, it will show only the first and last digits of the value:
+```
+(5 . . . 93) b104 negative:False
+```
+
+## Methods
+You can call the following methods from the objects.
+### convert()
+```
+convert(new_base)
+```
+This function will convert the value variable to a new base, set the base to the new base, and return itself. 
+### deep_convert()
+```
+deep_convert(new_base)
+```
+This function will create a new copy of the BaseNumber, convert it to a new base, and return the copy. 
+## Static Methods
+The class has multiple static methods to call.
+
+> Important
+>>These static methods require the bases to be the same for them to function. The above operations (i.e. `*`, `+`, etc.) automatically convert the bases when called. 
+### try_convert()
+```
+BaseNumber.try_convert(num,i_base,b_base)
+```
+This will try to call `base()` from the `baseconvert` module, and upon failure will use a recursive process to do it more effectively
+
+`num` is either a tuple or integer, `i_base` is the integer starting base and `b_base` is the new integer base.
+### validate_bases()
+```
+BaseNumber.validate_bases(num1,num2)
+```
+This function will throw an error if either number is not a BaseNumber object, or if the bases are not the same.
+### compare()
+```
+BaseNumber.compare(num1,num2)
+```
+Compares two BaseNumbers of the same base, will return a string of `"<"`, `">"`, or `"="` in relation to the comparative operator that matches `num1` and `num2`
+### add()
+```
+BaseNumber.add(num1,num2)
+```
+This adds two BaseNumbers of the same base and returns a BaseNumber sum.
+### subtract()
+```
+BaseNumber.subtract(num1,num2)
+```
+This subtracts two BaseNumbers of the same base (`num1 - num2`) and returns a BaseNumber output.
+### multiply()
+```
+BaseNumber.multiply(num1,num2,allow_karatsuba=True)
+```
+Multiplies two BaseNumbers of the same base together. 
+
+If either value is greater than a certain threshold, it will call the `BaseNumber.karatsuba()` function to multiply the values together. (The threshold it checks against uses the class variable `KARATSUBA_THRESHOLD`, creates a base 10 number of that length in all `9`s, and checks if it is above that number. By default the variable is set to `30`)
+
+If below the threshold , it attempts to convert both objects to integers, multiply them, then convert it back to the original value.
+
+If either attempt fails or it is above the threshold and karatsuba is disabled, it will call the `BaseNumber.raw_multiply` function.
+### raw_multiply()
+```
+BaseNumber.raw_multiply(num1,num2)
+```
+Multiplies two BaseNumbers of the same base together using basic arithmetic. Longest form of multiplication. 
+### karatsuba()
+```
+BaseNumber.karatsuba(num1,num2)
+```
+Multiplies two BaseNumbers of the same base together using the karatsuba algorithm. Optimized for extremely long numbers, this function has succeeded at multiplying two numbers with 27,000+ digits each (although it takes exponentially longer. The multiplication of the two numbers with over 27,000 digits each took just over 3 hours to compute).
+### exponent()
+```
+BaseNumber.raw_multiply(num,exponent)
+```
+Raises a BaseNumber to a BaseNumber exponent if both bases are the same. 
+### divmod()
+```
+BaseNumber.divmod(dividend,divisor)
+```
+Divides a BaseNumber dividend by a BaseNumber divisor if both bases are the same, returns a tuple of two BaseNumbers, the floored quotient and the modulus.
+### gcd()
+```
+BaseNumber.gcd(num1,num2)
+```
+Finds the greatest common denominator between two BaseNumbers of the same base, returning it as a BaseNumber.
+# BaseRational Objects
+BaseRational objects contain a numerator BaseNumber object, a denominator BaseNumber object, an integer as the base, and a boolean for its negative state. 
+## Creation
+BaseRational objects can be created with numerator and denominator parameters of BaseNumber objects, integers, or tuples. 
+
+Creating a BaseRational object with either numerator or denominator as an integer or tuple will create a BaseNumber object with the related input. 
+
+*The following generate identical BaseRational objects:*
+```
+n = BaseNumber((10,13),17)
+d = BaseNumber((3,15),17)
+
+BaseRational(n,d,17)
+```
+```
+BaseRational((10,13),(3,15),17)
+```
+The negative state is automatically set to False. To create a negative BaseRational object, include it in the arguments:
+```
+BaseRational((13,97),(67,89),103,False)
+BaseRational((86,22),(7,54),71,negative=False)
+```
+Each instance also has a boolean for whether or not the item automatically simplifies, by default it is True. Upon creation the instance will attempt to simplify. For example, `BaseRational((1,0),(1,5),10)` will have a numerator value of `(2,)` and denominator value of `(3,)` upon creation, whereas `BaseRational((1,0),(1,5),10,simplify=False)` will have a numerator value of `(1,0)` and denominator value of `(1,5)`
+
+The instance variables holding these values are `numerator`, `denominator`, `base`, `negative`, and `sim`
+## Operations
+BaseRational objects work with the following operations:
+```
++ - * ** /
+```
+These work with other BaseRational objects, BaseNumber objects, integers, and tuples of integers, and all will return BaseRational objects as outputs.
+
+>Important
+>>If you are trying to multiply extremely large numbers together, it is smart to use the `BaseRational.karatsuba()` function, which `*` will call if it is above a certain threshold anyways. 
+
+Comparison operators also work with the same available objects:
+```
+< > == <= >= 
+```
+
+They also work with the following functions:
+```
+float() abs() str()
+```
+`float()` will return the base 10 float approximation of the number. `abs()` will set the `negative` value to `False`.
+
+`str` is represented with the values of the numerator and denominator, base, negative state, and simplification value:
+```
+(43, 79, 51)
+---
+(2, 88, 14)
+b97 negative:True simplify:False
+```
+For either numerator or denominmator in the case of the value being too long or otherwise throwing an error, it will show only the first and last digits of the value:
+```
+(77 . . . 149)
+```
+## Methods
+You can call the following methods from the objects
+### convert()
+```
+convert(new_base)
+```
+This function will convert the stored BaseNumber objects to a new base, set the base to the new base, and return itself.
+### deep_convert()
+```
+deep_convert(new_base)
+```
+This function will create a new copy of the BaseRational, convert it to a new base, and return the copy. 
+### simplify()
+```
+simplify()
+```
+This function will first check if simplification is enabled for this instance, if it is it will get the greatest common denominator of its numerator and denominator and divide both by that gcd, and set its numerator and denominator to the new values. It will always return itself.
+### force_simplify()
+```
+force_simplify()
+```
+This function will divide its numerator and denominator by their gcd regardless of if simplification is enabled. 
+### deep_simplify()
+```
+deep_simplify()
+```
+This function will create a new copy of the BaseRational, run force_simplify on it, and return the copy. 
+### invert()
+```
+invert()
+```
+This function swaps the numerator and denominator, then returns itself.
+### deep_invert()
+```
+deep_invert()
+```
+This function will create a new copy of the BaseRational, run invert() on it, and return the copy.
+### mixed()
+```
+mixed(simplify=True)
+```
+This function returns a tuple of a BaseNumber and a BaseRational. It represents the object as an integer and fraction that is lower than one. Any zero values will return as `None` (i.e. calling this on a fraction less than one or on a whole number).
+
+Simplification is by default enabled but can be disabled for the resulting BaseRational.
+## Static Methods
+The class has multiple static methods to call.
+
+> Important
+>>Static methods that call multiple BaseRational objects require the bases to be the same for them to function. The above operations (i.e. `*`, `+`, etc.) automatically convert the bases when called. 
+### create_rational()
+```
+BaseRational.create_rational(input_val,b_base,simplify=True)
+```
+This function creates a BaseRational object from a BaseNumber, integer, or tuple, setting the denominator to a BaseNumber of value `(1,)`. If a BaseNumber is used as an input, it will convert it to the given base.
+### validate_bases()
+```
+BaseRational.validate_bases(num1,num2)
+```
+This function will throw an error if either number is not a BaseRational object, if the bases are not the same, or if either has a denominator with a value of `(0,)`.
+### compare()
+```
+BaseRational.compare(num1,num2,algorithm=0,allow_karatsuba=True,ignore_negative=False)
+```
+Compares two BaseRationals of the same base, will return a string of "<", ">", or "=" in relation to the comparative operator that matches num1 and num2.
+
+In order to compare them, the numerators are multiplied with the opposing denominators before being compared. This multiplication uses an algorithm depending on what it is set to. By default it is set to `0`, which uses the default multiply algorithm
+
+`0` - BaseNumber.multiply 
+
+`1` - BaseNumber.raw_multiply
+
+`2` - BaseNumber.karatsuba
+### multiply()
+```
+BaseRational.multiply(num1,num2,allow_karatsuba=True,simplify=True)
+```
+Multiplies two BaseRationals of the same base, multiplying the numerators with the numerators and denominators with the denominators using the BaseNumber.multiply method.
+### raw_multiply()
+```
+BaseRational.raw_multiply(num1,num2,simplify=True)
+```
+Multiplies two BaseRationals of the same base, multiplying the numerators with the numerators and denominators with the denominators using the BaseNumber.raw_multiply method.
+### karatsuba()
+```
+BaseRational.raw_multiply(karatsuba,simplify=True)
+```
+Multiplies two BaseRationals of the same base, multiplying the numerators with the numerators and denominators with the denominators using the BaseNumber.karatsuba method.
+### divide()
+```
+BaseRational.divide(dividend,divisor,algorithm=0,allow_karatsuba=True,simplify=True)
+```
+Uses deep_invert() to invert the divisor, then calls a multiplication algorithm on the dividend and inverted divisor. 
+
+This multiplication uses an algorithm depending on what it is set to. By default it is set to `0`, which uses the default multiply algorithm
+
+`0` - BaseRational.multiply 
+
+`1` - BaseRational.raw_multiply
+
+`2` - BaseRational.karatsuba
+### add()
+```
+BaseRational.add(num1,num2,algorithm=0,allow_karatsuba=True,simplify=True)
+```
+Cross multiplies each BaseRational's numerator and denominator with the opposing denominator, then adds the numerators together and returns the sum.
+
+This multiplication uses an algorithm depending on what it is set to. By default it is set to `0`, which uses the default multiply algorithm
+
+`0` - BaseNumber.multiply 
+
+`1` - BaseNumber.raw_multiply
+
+`2` - BaseNumber.karatsuba
+### subtract()
+```
+BaseRational.subtract(num1,num2,algorithm=0,allow_karatsuba=True,simplify=True)
+```
+Cross multiplies each BaseRational's numerator and denominator with the opposing denominator, inverts the negative value of the number being subtracted, then adds the numerators together and returns the sum.
+
+This multiplication uses an algorithm depending on what it is set to. By default it is set to `0`, which uses the default multiply algorithm
+
+`0` - BaseNumber.multiply 
+
+`1` - BaseNumber.raw_multiply
+
+`2` - BaseNumber.karatsuba
+### exponent()
+```
+BaseRational.exponent(num,exponent,simplify=True)
+```
+Raises a BaseRational number to a BaseNumber exponent. Will invert the numerator and denominator if the exponent is negative.
+>Important
+>> The `exponent` parameter must be a BaseNumber object, not a BaseRational. The bases must still be the same.
+## Credit
+This package would not be possible without squdle's `baseconvert` module at [baseconvert](https://pypi.org/project/baseconvert/).
