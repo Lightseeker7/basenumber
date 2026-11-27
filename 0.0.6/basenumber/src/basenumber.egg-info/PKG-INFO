@@ -1,0 +1,155 @@
+Metadata-Version: 2.4
+Name: basenumber
+Version: 0.0.6
+Summary: Package used for storing and performing arithmetic with integers of arbitrary base systems 2 and above.
+Author-email: "light.seeker" <light.the.seeker@gmail.com>
+License-Expression: MIT
+Project-URL: Homepage, https://pypi.org/project/basenumber/
+Project-URL: Repository, https://github.com/Lightseeker7/basenumber
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE.txt
+Requires-Dist: baseconvert
+Dynamic: license-file
+
+# basenumber
+Python library used for storing and performing arithmetic with integers of arbitrary base systems 2 and above.
+
+Github: [link](https://github.com/Lightseeker7/basenumber)
+
+Project: [linl](https://pypi.org/project/basenumber/)
+# BaseNumber Objects
+BaseNumber objects contain a tuple of integers for digits, an integer base, and a boolean for its negative state.
+
+## Creation
+To create a BaseNumber object using a tuple, it will set the object's value to the input tuple.
+
+To create a BaseNumber object using an integer, it will first convert the integer into the appropriate tuple.
+
+*The following two generate identical BaseNumber objects:*
+```
+BaseNumber(19,5)
+```
+```
+BaseNumber((3,4),5)
+```
+
+The negative value is automatically set to false. To create a negative BaseNumber object, include it in the arguments.
+```
+BaseNumber((3,4),5,True)
+```
+```
+BaseNumber((3,4),5,negative=True)
+```
+
+The instance variables holding these values are `value`, `base`, and `negative`.
+
+## Operations
+BaseNumber objects work with the following operations:
+```
++ - * // % ** divmod()
+```
+These work with other BaseNumber objects, integers, and tuples of integers, and will return BaseNumber objects as outputs.
+
+>Important
+>>If you are trying to multiply extremely large numbers together, it is smart to use the `BaseNumber.karatsuba()` function, which `*` will call if it is above a certain threshold anyways. 
+
+Comparison operators also work with the same available objects:
+```
+< > == <= >= 
+```
+
+They also work with the following functions:
+```
+int() float() abs() len() str()
+```
+`int()` will return the base 10 integer value of the number, `float()` the float of that number. `abs()` will set the `negative` value to `False`. `len()` will give the number of digits in the number.
+
+`str` is represented with the value, base, and negative state:
+```
+(3, 12, 5) b13 negative:True
+```
+In the case of the value being too long or otherwise throwing an error, it will show only the first and last digits of the value:
+```
+(5 . . . 93) b104 negative:False
+```
+
+## Methods
+You can call the following methods from the objects.
+### convert()
+```
+convert(new_base)
+```
+This function will convert the value variable to a new base, set the base to the new base, and return itself. 
+### deep_convert()
+```
+deep_convert(new_base)
+```
+This function will create a new copy of the BaseNumber, convert it to a new base, and return the copy. 
+## Static Methods
+The class has multiple static methods to call.
+
+> Important
+>>These static methods require the bases to be the same for them to function. The above operations (i.e. `*`, `+`, etc.) automatically convert the bases when called. 
+### try_convert()
+```
+BaseNumber.try_convert(num,i_base,b_base)
+```
+This will try to call `base()` from the `baseconvert` module, and upon failure will use a recursive process to do it more effectively
+
+`num` is either a tuple or integer, `i_base` is the integer starting base and `b_base` is the new integer base.
+### validate_bases()
+```
+BaseNumber.validate_bases(num1,num2)
+```
+This function will throw an error if either number is not a BaseNumber object, or if the bases are not the same.
+### compare()
+```
+BaseNumber.compare(num1,num2)
+```
+Compares two BaseNumbers of the same base, will return a string of `"<"`, `">"`, or `"="` in relation to the comparative operator that matches `num1` and `num2`
+### add()
+```
+BaseNumber.add(num1,num2)
+```
+This adds two BaseNumbers of the same base and returns a BaseNumber sum.
+### subtract()
+```
+BaseNumber.subtract(num1,num2)
+```
+This subtracts two BaseNumbers of the same base (`num1 - num2`) and returns a BaseNumber output.
+### multiply()
+```
+BaseNumber.multiply(num1,num2,allow_karatsuba=True)
+```
+Multiplies two BaseNumbers of the same base together. 
+
+If either value is greater than a certain threshold, it will call the `BaseNumber.karatsuba()` function to multiply the values together. (The threshold it checks against uses the class variable `KARATSUBA_THRESHOLD`, creates a base 10 number of that length in all `9`s, and checks if it is above that number. By default the variable is set to `30`)
+
+If below the threshold , it attempts to convert both objects to integers, multiply them, then convert it back to the original value.
+
+If either attempt fails or it is above the threshold and karatsuba is disabled, it will call the `BaseNumber.raw_multiply` function.
+### raw_multiply
+```
+BaseNumber.raw_multiply(num1,num2)
+```
+Multiplies two BaseNumbers of the same base together using basic arithmetic. Longest form of multiplication. 
+### karatsuba()
+```
+BaseNumber.karatsuba(num1,num2)
+```
+Multiplies two BaseNumbers of the same base together using the karatsuba algorithm. Optimized for extremely long numbers, this function has succeeded at multiplying two numbers with 27,000+ digits each (although it takes exponentially longer. The multiplication of the two numbers with over 27,000 digits each took just over 3 hours to compute).
+### exponent()
+```
+BaseNumber.raw_multiply(num,exponent)
+```
+Raises a BaseNumber to a BaseNumber exponent if both bases are the same. 
+### divmod()
+```
+BaseNumber.divmod(dividend,divisor)
+```
+Divides a BaseNumber dividend by a BaseNumber divisor if both bases are the same, returns a tuple of two BaseNumbers, the floored quotient and the modulus.
+## Credit
+This package would not be possible without squdle's `baseconvert` module at [baseconvert](https://pypi.org/project/baseconvert/).
